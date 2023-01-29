@@ -1,7 +1,7 @@
 
 *.bat
-Crawler.py
 package.json
 package-lock.json
 
 /node_modules/
+/[0-9]*/
