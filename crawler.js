@@ -15,6 +15,7 @@ const rawURL = "http://reserves.lib.tsinghua.edu.cn/book5//00001034/00001034000/
 const baseURL = "http://reserves.lib.tsinghua.edu.cn/";
 const ext = ".jpg";
 
+let totalPageCount = 0;
 
 function checkURL(rawURL) {
     if (rawURL.match(/http:\/\/reserves\.lib\.tsinghua\.edu\.cn\/book\d\/\/\d{8}\/\d{11}\/mobile\/index\.html/))
@@ -118,15 +119,17 @@ function main(rawURL) {
             fs.mkdirSync(dir + "/imgs");
             // fs.mkdirSync(dir + "/pdf");
         }
-
-        http.get(chapStartURL, options, (res) => {
-            if (res.statusCode == 200) {
-                downloadSingleChap(book, startChap);
-            }
-            else {
-                console.log("Download start failed, please check your Internet.");
-            }
-        });
+        let choice = rlSync.question("Book %s, stored at ./%s, Enter to start.");
+        if (choice == '') {
+            http.get(chapStartURL, options, (res) => {
+                if (res.statusCode == 200) {
+                    downloadSingleChap(book, startChap);
+                }
+                else {
+                    console.log("Download start failed, please check your Internet.");
+                }
+            });
+        }
     }
 }
 
