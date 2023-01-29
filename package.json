@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "jspdf": "^2.5.1",
-    "readline-sync": "^1.4.10",
-    "request": "^2.88.2"
-  }
-}
