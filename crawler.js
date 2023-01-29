@@ -46,13 +46,14 @@ function downloadSingleChap(book, curChap) {
             });
             res.on('end', () => {
                 if (!data.match(/bookConfig\.totalPageCount=\d+/)) {
-                    console.log("Book download finished.");
+                    console.log("Book download finished with %d pages.", totalPageCount);
+                    console.timeEnd("Finished in");
                     // doc.save(book.slice(7, 15) + '/pdf/' + book.slice(7, 15) + '.pdf');
                     return;
                 }
                 pageCnt = Number(data.match(/bookConfig\.totalPageCount=\d+/)[0].slice(26,));
-
-                console.log("Chap %d has %d pages in total:", curChap, pageCnt);
+                totalPageCount += pageCnt;
+                console.log("\nChap %d has %d pages:", curChap, pageCnt);
 
                 downloadImgs(book, curChap, curChapURL, pageCnt, ext, 1);
                 return pageCnt;
@@ -76,22 +77,22 @@ function downloadImgs(book, curChap, curChapURL, pageCnt, ext, cnt) {
                     img.close();
                     // doc.addPage();
                     // doc.addImage(path, 'jpg', 0, 0, 210, 297);
-                    console.log(curChap + "-" + cnt + ext + " downloaded.");
+                    process.stdout.write("\r\x1b[K" + curChap + "-" + cnt + ext + " downloaded.");
+                    if (cnt >= pageCnt) {
+                        console.log("\nChapter %d finished.", curChap);
+                        downloadSingleChap(book, curChap + 1);
+                        return;
+                    }
                 })
             }
             else {
+                console.log("\r\x1b[K" + curChap + "-" + cnt + ext + " download failed.");
                 console.log("Error: " + res.statusCode);
-                return;
             }
         }).on('error', (err) => {
             console.log("Error: ", err.message);
         });
-        if (cnt >= pageCnt) {
-            console.log("Chapter %d finished.", Number(curChapURL.slice(60, 63)));
-            downloadSingleChap(book, curChap + 1);
-            return;
-        }
-        else {
+        if (cnt < pageCnt) {
             downloadImgs(book, curChap, curChapURL, pageCnt, ext, cnt + 1);
         }
     }, 200);
@@ -116,11 +117,16 @@ function main(rawURL) {
         let dir = book.slice(7, 15);
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
-            fs.mkdirSync(dir + "/imgs");
-            // fs.mkdirSync(dir + "/pdf");
         }
-        let choice = rlSync.question("Book %s, stored at ./%s, Enter to start.");
+        if (!fs.existsSync(dir + "/imgs")) {
+            fs.mkdirSync(dir + "/imgs");
+        }
+        if (!fs.existsSync(dir + "/pdf")) {
+            fs.mkdirSync(dir + "/pdf");
+        }
+        let choice = rlSync.question("Book " + dir + ", stored at ./" + dir + "/, Enter to start.");
         if (choice == '') {
+            console.time("Finished in");
             http.get(chapStartURL, options, (res) => {
                 if (res.statusCode == 200) {
                     downloadSingleChap(book, startChap);
