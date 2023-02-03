@@ -8,7 +8,7 @@
 
 1. 需要安装node.js
 2. 需要安装readline-sync
-   ```npm install readline-sync```
+   ```npm install -g readline-sync```
 
 ### Usage
 
