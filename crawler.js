@@ -115,18 +115,22 @@ function main(rawURL) {
         let startChap = parseURL(rawURL)[1];
         let chapStartURL = geneURL(book, startChap, 1, ext);
         let dir = book.slice(7, 15);
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-        }
-        if (!fs.existsSync(dir + "/imgs")) {
-            fs.mkdirSync(dir + "/imgs");
-        }
-        if (!fs.existsSync(dir + "/pdf")) {
-            fs.mkdirSync(dir + "/pdf");
-        }
-        let choice = rlSync.question("Book " + dir + ", stored at ./" + dir + "/, Enter to start.");
+
+        let choice = rlSync.question("Book stored at ./" + dir + "/, Enter to start.");
+
         if (choice == '') {
             console.time("Finished in");
+
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
+            if (!fs.existsSync(dir + "/imgs")) {
+                fs.mkdirSync(dir + "/imgs");
+            }
+            if (!fs.existsSync(dir + "/pdf")) {
+                fs.mkdirSync(dir + "/pdf");
+            }
+            
             http.get(chapStartURL, options, (res) => {
                 if (res.statusCode == 200) {
                     downloadSingleChap(book, startChap);
