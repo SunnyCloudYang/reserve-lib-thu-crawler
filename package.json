@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "pdfkit": "^0.13.0",
+    "request": "^2.88.2"
+  }
+}
