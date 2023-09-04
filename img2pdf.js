@@ -2,8 +2,9 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const { promisify } = require('util');
 
-// const imageFolder = './00003035/imgs';
-// const pdfFile = './00003035/pdf/book.pdf';
+// const bookId = '00010472';
+// const imageFolder = `./${bookId}/imgs`;
+// const pdfFile = `./${bookId}/pdf/${bookId}.pdf`;
 
 async function img2pdf(imageFolder, pdfFile) {
     try {
