@@ -144,8 +144,8 @@ async function download(textbookUrl = exampleUrl) {
             return;
         }
 
-        const quality = ['thumb', 'page', 'large'];
-        const qualityIndex = 1;
+        const quality = ['thumb', 'page', 'large', 'mobile'];
+        const qualityIndex = 3;
         let title = bookCode.slice(7, 15);
 
         try {
@@ -194,19 +194,24 @@ async function download(textbookUrl = exampleUrl) {
             fs.mkdirSync(`${dir}/pdf`);
         }
 
+        let startChapter = Number(textbookUrl.match(/(\d{3})\/mobile/)[1]);
+        if (startChapter !== 0) {
+            console.log(`Start downloading from chapter ${startChapter}`);
+        }
         let chapterCount = 0;
         let totalPageCount = 0;
         while (true) {
             try {
                 // chapterUrl: 'http://reserves.lib.tsinghua.edu.cn/book5//00000827/00000827000/mobile/'
-                const chapterUrl = `${baseUrl}${bookCode}${chapterCount.toString().padStart(3, '0')}/mobile/`;
+                const chapterUrl = `${baseUrl}${bookCode}${(startChapter + chapterCount).toString().padStart(3, '0')}/mobile/`;
                 const pageCount = await getPageCount(chapterUrl + 'javascript/config.js');
+                // console.log(chapterUrl + 'javascript/config.js');
 
                 if (pageCount) {
-                    console.log(`Chapter ${chapterCount} has ${pageCount} pages`);
+                    console.log(`Chapter ${(startChapter + chapterCount)} has ${pageCount} pages`);
                 }
                 else {
-                    console.log(`Chapter ${chapterCount} not found, please check.`);
+                    console.log(`Chapter ${(startChapter + chapterCount)} not found, please check.`);
                     break;
                 }
 
@@ -214,27 +219,27 @@ async function download(textbookUrl = exampleUrl) {
 
                 for (const page of pages) {
                     // imageUrl: 'http://reserves.lib.tsinghua.edu.cn/book5//00000827/00000827000/files/mobile/1.jpg'
-                    const imageUrl = `${baseUrl}${bookCode}${chapterCount.toString().padStart(3, '0')}/files/${quality[qualityIndex]}/${page}.jpg`;
+                    const imageUrl = `${baseUrl}${bookCode}${(startChapter + chapterCount).toString().padStart(3, '0')}/files/${quality[qualityIndex]}/${page}.jpg`;
 
                     // outputPath: './00000827/0-1.jpg'
-                    const outputPath = `${dir}/imgs/${chapterCount}-${page}.jpg`;
+                    const outputPath = `${dir}/imgs/${(startChapter + chapterCount)}-${page}.jpg`;
 
                     // check if file exists
                     if (fs.existsSync(outputPath)) {
                         process.stdout.write("\r\x1b[K" + `Skipping: ${chapterCount}-${page}.jpg`);
                         continue;
                     }
-                    process.stdout.write("\r\x1b[K" + `正在下载: ${chapterCount}-${page}.jpg`);
+                    process.stdout.write("\r\x1b[K" + `正在下载: ${(startChapter + chapterCount)}-${page}.jpg`);
                     await downloadImage(imageUrl, outputPath, 0);
                     totalPageCount++;
-                    process.stdout.write("\r\x1b[K" + `下载完成: ${chapterCount}-${page}.jpg`);
+                    process.stdout.write("\r\x1b[K" + `下载完成: ${(startChapter + chapterCount)}-${page}.jpg`);
 
                     await new Promise((resolve) => setTimeout(resolve, 100));
                 }
-                console.log(`\nChapter ${chapterCount} downloaded.`);
+                console.log(`\nChapter ${(startChapter + chapterCount)} downloaded.`);
                 chapterCount++;
             } catch (error) {
-                console.log(`Chapter ${chapterCount} not found, stop download.`);
+                console.log(`Chapter ${(startChapter + chapterCount)} not found, stop download.`);
                 break;
             }
 
