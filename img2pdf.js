@@ -6,9 +6,14 @@ const { promisify } = require('util');
 // const imageFolder = `./${bookId}/imgs`;
 // const pdfFile = `./${bookId}/pdf/${bookId}.pdf`;
 
-async function img2pdf(imageFolder, pdfFile) {
+async function img2pdf(imageFolder, pdfFile, pageWidth = 595, pageHeight = 842) {
+    if (pageHeight * pageWidth === 0) {
+        console.log('未获取有效页面大小，使用默认值A4');
+        pageWidth = 595;
+        pageHeight = 842;
+    }
     try {
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({size: [pageWidth, pageHeight]});
         const { outline } = doc;
         const topLevel = outline.addItem('目录');
 
@@ -37,7 +42,7 @@ async function img2pdf(imageFolder, pdfFile) {
                 chapter = parseInt(file.split('-')[0]);
                 try {
                     await doc.image(imagePath, 0, 0, {
-                        fit: [595, 842],
+                        fit: [pageWidth, pageHeight],
                         align: 'center',
                         valign: 'center'
                     });
@@ -48,7 +53,7 @@ async function img2pdf(imageFolder, pdfFile) {
                         // chapterItem.addPage(doc.page);
                         prevChapter = chapter;
                     }
-                    doc.addPage({size: 'A4'});
+                    doc.addPage();
                 }
                 catch (error) {
                     console.error(`无法读取图片文件: ${imagePath}，已跳过`);

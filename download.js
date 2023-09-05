@@ -100,6 +100,9 @@ function getBookTitle(url) {
     });
 }
 
+let pageWidth = 0;
+let pageHeight = 0;
+let pageSizeFlag = false;
 function getPageCount(chapterConfigUrl) {
     // console.log(`Getting page count from: ${chapterConfigUrl}`);
     return new Promise((resolve, reject) => {
@@ -117,8 +120,23 @@ function getPageCount(chapterConfigUrl) {
                 }
 
                 try {
-                    const pattern = /bookConfig\.totalPageCount=(\d+)/;
-                    const pageCountMatch = body.match(pattern);
+                    const pageCountPattern = /bookConfig\.totalPageCount=(\d+)/;
+                    const pageCountMatch = body.match(pageCountPattern);
+
+                    if (pageSizeFlag === false) {
+                        const pageSizePattern = /bookConfig\.largePageWidth=(\d+);bookConfig\.largePageHeight=(\d+)/;
+                        const pageSizeMatch = body.match(pageSizePattern);
+                        if (pageSizeMatch) {
+                            pageWidth = parseInt(pageSizeMatch[1]);
+                            pageHeight = parseInt(pageSizeMatch[2]);
+                            pageSizeFlag = !!(pageWidth * pageHeight);
+                            // console.log(`Page size: ${pageWidth}x${pageHeight}`);
+                        }
+                        else {
+                            console.log('Page size not found');
+                        }
+                    }
+
                     if (pageCountMatch) {
                         const pageCount = parseInt(pageCountMatch[1]);
                         // console.log(`Page count: ${pageCount}`);
@@ -150,6 +168,7 @@ async function download(textbookUrl = exampleUrl) {
 
         try {
             // bookTitle: '复变函数/郑建华编著'
+            // get from: 'http://reserves.lib.tsinghua.edu.cn/book5//00000827/00000827000/mobile/javascript/search_config.js'
             const bookTitle = await getBookTitle(`${baseUrl}${bookCode}000/mobile/javascript/search_config.js`);
             title = bookTitle;
             // console.log(`Book title: ${bookTitle}`);        
@@ -246,7 +265,7 @@ async function download(textbookUrl = exampleUrl) {
         }
         console.log(`Download finished. ${chapterCount} chapter(s) with ${totalPageCount} page(s) in total.`);
         
-        return dir;
+        return [dir, pageWidth, pageHeight];
     } catch (error) {
         console.error('下载出错:', error);
     }

@@ -23,11 +23,11 @@ async function main() {
             });
         });
     }
-    const dir = await download.download(textbookUrl);
+    const [dir, pageWidth, pageHeight] = await download.download(textbookUrl);
     // const dir = './00001034'
     console.log('下载完成:', dir.slice(2));
     console.log('正在生成 PDF 文件...');
-    await img2pdf.img2pdf(`${dir}/imgs`, `${dir}/pdf/${dir.slice(2)}.pdf`);
+    await img2pdf.img2pdf(`${dir}/imgs`, `${dir}/pdf/${dir.slice(2)}.pdf`, pageWidth, pageHeight);
     console.log('全部完成，程序退出');
     process.exit(0);
 }
